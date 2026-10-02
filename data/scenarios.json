@@ -1,0 +1,72 @@
+[
+  {
+    "id": "geopolitical",
+    "event_type": "GEOPOLITICAL",
+    "name": "Geopolitical scenario",
+    "shocks": {
+      "Equity": -0.1,
+      "Corporate Bond": -0.06,
+      "Corporate Loan": -0.05,
+      "Government Bond": -0.02,
+      "Derivative": -0.12
+    },
+    "rate_change": 0,
+    "assumptions": "Synthetic hackathon stress assumptions. Fixed proportional shocks and duration approximation, no hedging/netting or calibrated default model."
+  },
+  {
+    "id": "macroeconomic",
+    "event_type": "MACROECONOMIC",
+    "name": "Macroeconomic scenario",
+    "shocks": {
+      "Equity": -0.08,
+      "Corporate Bond": -0.02,
+      "Corporate Loan": -0.03,
+      "Government Bond": 0,
+      "Derivative": -0.07
+    },
+    "rate_change": 0.02,
+    "assumptions": "Synthetic hackathon stress assumptions. Fixed proportional shocks and duration approximation, no hedging/netting or calibrated default model."
+  },
+  {
+    "id": "credit_event",
+    "event_type": "CREDIT_EVENT",
+    "name": "Credit Event scenario",
+    "shocks": {
+      "Equity": -0.18,
+      "Corporate Bond": -0.16,
+      "Corporate Loan": -0.2,
+      "Government Bond": 0,
+      "Derivative": -0.1
+    },
+    "rate_change": 0,
+    "assumptions": "Synthetic hackathon stress assumptions. Fixed proportional shocks and duration approximation, no hedging/netting or calibrated default model."
+  },
+  {
+    "id": "merger_acquisition",
+    "event_type": "MERGER_ACQUISITION",
+    "name": "Merger Acquisition scenario",
+    "shocks": {
+      "Equity": 0.04,
+      "Corporate Bond": -0.01,
+      "Corporate Loan": -0.015,
+      "Government Bond": 0,
+      "Derivative": 0.02
+    },
+    "rate_change": 0,
+    "assumptions": "Synthetic hackathon stress assumptions. Fixed proportional shocks and duration approximation, no hedging/netting or calibrated default model."
+  },
+  {
+    "id": "product_launch",
+    "event_type": "PRODUCT_LAUNCH",
+    "name": "Product Launch scenario",
+    "shocks": {
+      "Equity": 0.06,
+      "Corporate Bond": 0.01,
+      "Corporate Loan": 0.005,
+      "Government Bond": 0,
+      "Derivative": 0.02
+    },
+    "rate_change": 0,
+    "assumptions": "Synthetic hackathon stress assumptions. Fixed proportional shocks and duration approximation, no hedging/netting or calibrated default model."
+  }
+]

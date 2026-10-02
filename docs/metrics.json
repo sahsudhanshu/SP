@@ -1,0 +1,16 @@
+{
+  "dataset": "24 synthetic records (12 paired news/social texts); not an independent benchmark",
+  "records_processed": 24,
+  "sentiment_mode": "finbert",
+  "event_classification_accuracy": 1.0,
+  "sentiment_label_agreement": 0.9166666666666666,
+  "average_pipeline_latency_ms": 27.43763750307456,
+  "hero_analysis_and_stress_ms": 2.584400004707277,
+  "hero_impact": 9.78,
+  "hero_portfolio_before": 100000000.0,
+  "hero_portfolio_after": 97182968.8,
+  "hero_loss": 2817031.2,
+  "hero_loss_percentage": 2.817,
+  "caveats": "Synthetic author-labelled examples share vocabulary with rules. Accuracy does not establish out-of-sample performance. Latency excludes model startup and includes repeated-text cache effects.",
+  "average_stress_ms_100_runs": 0.6449910000083037
+}

@@ -22,7 +22,7 @@ Core: `backend/v2.py`, `backend/services/intelligence.py`, `propagation.py`, `sc
 25 passing tests, successful production build, active backend/frontend, original FinBERT hero confirmed before V2 implementation.
 
 ## 8. Tests after
-59 passing tests (34 new cases, all original 25 retained), latest run 9.42 seconds. Next.js production build passed with static V2 routes and preserved `/legacy`. Additional browser checks verified asset-node details, deep links, all routes, mobile widths, scenario controls, what-if recalculation, alert empty states, missing-key live fallback, reset and hero replay, visible backend outage and recovery. All seven deck slides and rendered PDF pages were inspected. Data validation checked 41 records: 24 source records, 12 positions, 5 scenarios; 12 expected text copies, no missing fields or invalid records, 6 source records without named portfolio issuer matches.
+59 passing tests (34 new cases, all original 25 retained), latest run 7.51 seconds. Next.js production build passed with static V2 routes and preserved `/legacy`. Additional browser checks verified asset-node details, deep links, all routes, mobile widths, scenario controls, what-if recalculation, alert empty states, missing-key live fallback, reset and hero replay, visible backend outage and recovery. All seven deck slides and rendered PDF pages were inspected. Data validation checked 41 records: 24 source records, 12 positions, 5 scenarios; 12 expected text copies, no missing fields or invalid records, 6 source records without named portfolio issuer matches.
 
 ## 9. Actual measured metrics
 | Metric | V1 saved baseline | V2 measured |
@@ -50,3 +50,4 @@ Synthetic positions and correlated source fixtures; limited dictionaries; lexica
 3. **Confidence-aware prioritization:** distinguish severity, evidence strength and age without turning confidence into loss probability.
 4. **Exposure-aware scenario analysis:** compare explicit assumptions and recalculate five counterfactual controls using the same valuation engine.
 5. **Reconciled, explainable attribution:** connect every loss to its asset, sector, event, source evidence and assumptions.
+

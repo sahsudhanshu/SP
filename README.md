@@ -61,7 +61,7 @@ The synthetic portfolio includes corporate loans, government and corporate bonds
 
 ## 4. Quickstart & Installation
 
-Tested on Windows with Python 3.14 and Node 22. Python 3.11+ and Node 20.9+ are the recommended starting points. All commands run from the repository root unless explicitly stated. First-time package installation and optional model download require internet; subsequent demo runs do not.
+Tested on Windows with Python 3.14 and Node 24. Python 3.11+ and Node 20.9+ are the recommended starting points. All commands run from the repository root unless explicitly stated. First-time package installation and optional model download require internet; subsequent demo runs do not.
 
 ```powershell
 git clone https://github.com/sahsudhanshu/SP.git
@@ -197,7 +197,7 @@ cd frontend
 npm run build
 ```
 
-25 automated tests pass, including sentiment fallback behavior and transformer output formats, five event labels/OTHER, normalization, extraction, portfolio totals, exposure, configurable impact, hand-calculated stress losses/gains, duration repricing, API routes and malformed requests, missing-key/outage fallback, replay completion, and the text-to-exposure-to-stress end-to-end flow. Tests isolate SQLite in `work/test.db` and force fallback to remain offline; actual FinBERT inference was separately exercised in evaluation.
+The V1 baseline had 25 passing tests, including sentiment fallback behavior and transformer output formats, five event labels/OTHER, normalization, extraction, portfolio totals, exposure, configurable impact, hand-calculated stress losses/gains, duration repricing, API routes and malformed requests, missing-key/outage fallback, replay completion, and the text-to-exposure-to-stress end-to-end flow. Tests isolate SQLite in `work/test.db` and force fallback to remain offline; actual FinBERT inference was separately exercised in evaluation.
 
 ### Limitations and future work
 
@@ -214,5 +214,6 @@ Future work: independent finance-labelled evaluation, trained event classificati
 - [Submission audit](docs/submission-audit.md)
 - [Dataset documentation](data/README.md)
 
-Before submitting, fill the candidate metadata above and on slide 1, record/upload the YouTube walkthrough, verify this GitHub repository is public, confirm the final code has been pushed, and test both repository and video access in an incognito window. The official preferred repository naming is `<college>-<candidate-name>-hackathon`; the user explicitly selected the existing `SP` repository for this implementation.
+The V2 code has been pushed to `main` and its remote commit verified (see docs/repository-publish-status.md). Before submitting, fill the candidate metadata above and on slide 1, record/upload the YouTube walkthrough, verify this GitHub repository is public, confirm the final code has been pushed, and test both repository and video access in an incognito window. The official preferred repository naming is `<college>-<candidate-name>-hackathon`; the user explicitly selected the existing `SP` repository for this implementation.
+
 

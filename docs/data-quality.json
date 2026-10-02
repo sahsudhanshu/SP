@@ -1,0 +1,10 @@
+{
+  "records_checked": 41,
+  "source_records": 24,
+  "duplicates": 12,
+  "missing_fields": 0,
+  "invalid_records": 0,
+  "unknown_entity_records": 6,
+  "issues": [],
+  "notes": "Normalized cross-source copies are expected and collapsed by fusion. Unknown issuer means no portfolio dictionary match, not necessarily a bad record."
+}

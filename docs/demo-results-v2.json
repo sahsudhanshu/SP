@@ -1,0 +1,48 @@
+{
+  "model": "finbert",
+  "event": "GEOPOLITICAL",
+  "cluster_id": "cluster_4eddb6faefff",
+  "sources": 2,
+  "distinct_texts": 1,
+  "collapsed_copies": 1,
+  "impact": 9.78,
+  "confidence": 0.855,
+  "effective_risk": 8.3619,
+  "risk_level": "CRITICAL",
+  "direct_exposure": 42000000.0,
+  "weighted_exposure": 59500000.0,
+  "risk_paths": 12,
+  "propagated_risk": 3.570531,
+  "before": 100000000.0,
+  "after": 97182968.8,
+  "loss": 2817031.2,
+  "sector_losses": [
+    {
+      "sector": "Energy",
+      "loss": 1679226.0
+    },
+    {
+      "sector": "Technology",
+      "loss": 266994.0
+    },
+    {
+      "sector": "Financials",
+      "loss": 184842.0
+    },
+    {
+      "sector": "Healthcare",
+      "loss": 82152.0
+    },
+    {
+      "sector": "Consumer",
+      "loss": 143766.0
+    },
+    {
+      "sector": "Industrials",
+      "loss": 460051.2
+    }
+  ],
+  "what_if_1_5x_loss": 4225546.8,
+  "summary": "Portfolio attention is elevated: 1 high or critical event clusters affect Energy, Industrials. Highest effective risk is 8.36/10.",
+  "note": "Distinct wording is not verified independence. Normalized copies do not increase confidence."
+}

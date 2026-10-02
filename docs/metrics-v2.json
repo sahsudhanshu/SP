@@ -1,0 +1,37 @@
+{
+  "dataset": "24 synthetic author-labelled records; 12 correlated news/social pairs",
+  "records_processed": 24,
+  "sentiment_mode": "finbert",
+  "event_classification_accuracy": 1.0,
+  "sentiment_label_agreement": 0.9166666666666666,
+  "average_pipeline_latency_ms": 22.072570833794696,
+  "average_stress_ms_100_runs": 0.07022000005235896,
+  "fusion_and_propagation_total_ms": 14.588799997000024,
+  "clusters": 12,
+  "hero_loss": 2817031.2,
+  "hero_portfolio_after": 97182968.8,
+  "benchmark": {
+    "environment": "Windows-11-10.0.26300-SP0",
+    "python": "3.14.6",
+    "model": "finbert",
+    "device": "CPU",
+    "rounds": 3,
+    "batch_size": 8,
+    "sequential_ms_per_record": [
+      24.832858332956675,
+      24.531887499809574,
+      25.297008333533693
+    ],
+    "batched_ms_per_record": [
+      21.29492916719755,
+      20.712937500017386,
+      20.370529166636214
+    ],
+    "sequential_median_ms": 24.832858332956675,
+    "batched_median_ms": 20.712937500017386,
+    "warm_cache_ms_per_record": 0.007341666787397116,
+    "labels_identical": true,
+    "max_score_difference": 0.0
+  },
+  "caveats": "Small synthetic examples share rule vocabulary; no independent validation. Historical V1 timing is not a controlled comparison. Controlled arms alternate order, clear result caches and exclude model loading; batching may be slower on this CPU. Current pipeline includes batched NLP/entity/impact, excludes SQLite, HTTP and V2 fusion. Stress timing excludes SQLite; V1 stress timing included a scenario read. Fusion/graph total reported separately."
+}

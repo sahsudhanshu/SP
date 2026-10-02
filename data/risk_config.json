@@ -1,0 +1,9 @@
+{
+  "half_life_hours": 24,
+  "cluster_window_hours": 48,
+  "similarity_threshold": 0.42,
+  "source_reliability": {"news": 0.90, "verified": 0.95, "social": 0.60, "unverified": 0.45},
+  "source_overrides": {},
+  "thresholds": {"MEDIUM": 3, "HIGH": 6, "CRITICAL": 8},
+  "designation": "Configurable synthetic assumptions; internal prototype thresholds, not regulatory standards"
+}

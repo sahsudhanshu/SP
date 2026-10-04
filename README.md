@@ -13,6 +13,8 @@ Real-Time Financial Risk Intelligence & Portfolio Stress Testing
 
 The current application adds source fusion, confidence/recency-adjusted priorities, an interactive financial transmission graph, scenario comparison and five what-if controls. The original V1 APIs, finance formulas and UI (at `/legacy`) remain available.
 
+**Live news:** fetched at startup from public publisher RSS without credentials. NewsAPI remains optional. Demo fallback occurs only if all live sources fail; explicit Reset / Next event controls remain available for rehearsal. Old demo observations are retained in storage but excluded from the live V2 workspace; explicit replay or source failure enables demo data. Portfolio positions and local social posts remain synthetic.
+
 **Open:** http://127.0.0.1:3000 · **Risk map:** `/risk-map` · **Scenario lab:** `/stress-testing` · **Traceability:** `/audit` · **Measured diagnostics:** `/evaluation`.
 
 V2 pages also include `/risk-feed`, `/portfolio`, `/timeline`, `/alerts`, and `/heatmap`. Clustering collapses the 24 synthetic fixture records into 12 events; copied social reports do not increase confidence. Sources and assumptions remain explicitly labelled. Confidence controls prioritization, not expected-loss probability.
@@ -33,9 +35,9 @@ The sections below document the preserved V1 engine and original setup. Metrics 
 
 Financial news and investor discussion arrive as unstructured text, while risk decisions require issuer, sector and portfolio context. RiskPulse AI converts text from two sources into structured signals and directly uses those signals to run synthetic portfolio scenario analysis.
 
-The prototype implements the mandatory AI/NLP risk engine and Module B: strategic portfolio stress testing. It supports deterministic offline replay, optional live news with graceful fallback, an explanation of each impact component, issuer/sector exposure mapping, automatic stress tests for impact scores at least eight, and asset-level loss reconciliation.
+The prototype implements the mandatory AI/NLP risk engine and Module B: strategic portfolio stress testing. It supports deterministic offline replay, live news from public publisher RSS, with optional NewsAPI and demo fallback only on source failure, an explanation of each impact component, issuer/sector exposure mapping, automatic stress tests for impact scores at least eight, and asset-level loss reconciliation.
 
-All positions, issuers, source records, sensitivities and shocks are synthetic. The product supports explainable analyst triage and scenario comparison. It does not forecast market prices, provide calibrated loss probabilities, execute trades or use confidential information. AI assistance was used for implementation and documentation; the candidate should review and understand the full submission.
+All positions, issuers, local demo source records, sensitivities and shocks are synthetic. Live publisher headlines retain their publication dates and source URLs. The product supports explainable analyst triage and scenario comparison. It does not forecast market prices, provide calibrated loss probabilities, execute trades or use confidential information. AI assistance was used for implementation and documentation; the candidate should review and understand the full submission.
 
 ## 2. Architecture & Tech Stack
 
@@ -119,7 +121,8 @@ Copy `.env.example` to `.env` if configuration is needed. Defaults work without 
 
 | Variable | Default | Meaning |
 |---|---|---|
-| NEWS_API_KEY | empty | Optional NewsAPI key; missing key uses demo fallback |
+| NEWS_API_KEY | empty | Optional NewsAPI key; without a key, public BBC Business / CNBC Finance RSS is used |
+| LIVE_NEWS_ON_STARTUP | 1 | Fetch real news at startup; `0` selects offline replay startup |
 | MODEL_NAME | ProsusAI/finbert | Local finance sentiment model name |
 | SENTIMENT_MODE | auto | `fallback` forces the lexicon; auto tries local FinBERT |
 | ALLOW_MODEL_DOWNLOAD | 0 | `1` permits startup download; pre-download is preferable |
@@ -145,7 +148,7 @@ No credentials are in source. The server binds to loopback and is intended for l
 | GET | /api/statistics | Counts, mean impact, processing latency and record-order trend |
 | POST | /api/demo/next | Process the next deterministic source record |
 | POST | /api/demo/reset | Clear runtime signals/results and process six ordinary initial records |
-| POST | /api/ingest/live | Optional NewsAPI; missing key, unusable response or outage falls back to demo |
+| POST | /api/ingest/live | NewsAPI when configured, then public publisher RSS; demo only when all sources fail. Existing articles are skipped. |
 
 Example analysis body:
 

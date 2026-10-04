@@ -1,5 +1,6 @@
 import os
 os.environ['SENTIMENT_MODE']='fallback'
+os.environ['LIVE_NEWS_ON_STARTUP']='0'
 from pathlib import Path
 os.environ['DATABASE_URL']=str(Path(__file__).resolve().parents[2]/'work/test.db')
 import pytest
@@ -109,11 +110,66 @@ def test_invalid_input(client):
 
 def test_live_fallback(client,monkeypatch):
     monkeypatch.delenv('NEWS_API_KEY',raising=False)
-    assert client.post('/api/ingest/live').json()['mode']=='demo_fallback'
-    monkeypatch.setenv('NEWS_API_KEY','test-key')
-    def fail(*args,**kwargs): raise RuntimeError('simulated outage')
+    import httpx
+    def fail(*args,**kwargs): raise httpx.ConnectError('simulated outage')
     monkeypatch.setattr('backend.main.httpx.get',fail)
     assert client.post('/api/ingest/live').json()['mode']=='demo_fallback'
+    monkeypatch.setenv('NEWS_API_KEY','test-key')
+    assert client.post('/api/ingest/live').json()['mode']=='demo_fallback'
+
+def test_live_rss_without_key_and_duplicate_fetch(client,monkeypatch):
+    import httpx
+    monkeypatch.delenv('NEWS_API_KEY',raising=False)
+    xml='''<rss><channel><item><title>Central bank cuts interest rates</title>
+    <description>Inflation slows in the economy.</description>
+    <link>https://example.com/news/rates-test</link>
+    <pubDate>Sat, 03 Oct 2026 12:00:00 GMT</pubDate></item></channel></rss>'''
+    monkeypatch.setattr('backend.main.httpx.get',lambda url,**kwargs: httpx.Response(200,text=xml,request=httpx.Request('GET',url)))
+    before=client.get('/api/statistics').json()['demo_cursor']
+    result=client.post('/api/ingest/live').json()
+    assert result['mode']=='live_news' and result['provider']=='BBC Business'
+    assert result['new_count']==1
+    signal=result['signals'][0]
+    assert signal['source_url']=='https://example.com/news/rates-test'
+    assert signal['timestamp']=='2026-10-03T12:00:00+00:00'
+    repeated=client.post('/api/ingest/live').json()
+    assert repeated['mode']=='live_news' and repeated['new_count']==0 and repeated['already_seen']==1
+    assert client.get('/api/statistics').json()['demo_cursor']==before
+    assert client.get('/api/health').json()['data_mode']=='live_news'
+    workspace=client.get('/api/v2/dashboard').json()
+    assert workspace['observation_count']>=1
+    assert all(not sid.startswith(('news_','social_posts_')) for c in workspace['clusters'] for sid in c['member_ids'])
+    assert all(not h['signal_id'].startswith(('news_','social_posts_')) for h in workspace['history'])
+
+def test_bad_api_key_uses_rss_before_demo(client,monkeypatch):
+    import httpx
+    monkeypatch.setenv('NEWS_API_KEY','invalid-test-key')
+    calls=[]
+    def get(url,**kwargs):
+        calls.append(url)
+        if 'newsapi.org' in url:
+            return httpx.Response(401,request=httpx.Request('GET',url))
+        return httpx.Response(200,text='<rss><channel><item><title>Market report</title><link>https://example.com/market-test</link></item></channel></rss>',request=httpx.Request('GET',url))
+    monkeypatch.setattr('backend.main.httpx.get',get)
+    result=client.post('/api/ingest/live').json()
+    assert result['mode']=='live_news' and result['provider']=='BBC Business'
+    assert len(calls)==2
+
+def test_malformed_and_empty_feeds_fall_back_only_after_all_fail(client,monkeypatch):
+    import httpx
+    monkeypatch.delenv('NEWS_API_KEY',raising=False)
+    calls=[]
+    def get(url,**kwargs):
+        calls.append(url)
+        return httpx.Response(200,text='invalid xml' if len(calls)==1 else '<rss><channel/></rss>',request=httpx.Request('GET',url))
+    monkeypatch.setattr('backend.main.httpx.get',get)
+    before=client.get('/api/statistics').json()['demo_cursor']
+    result=client.post('/api/ingest/live').json()
+    assert result['mode']=='demo_fallback' and len(calls)==2
+    assert 'BBC Business' in result['reason'] and 'CNBC Finance' in result['reason']
+    assert client.get('/api/statistics').json()['demo_cursor']==before+1
+    assert client.get('/api/health').json()['data_mode']=='demo_fallback'
+    assert any(sid.startswith('news_') for c in client.get('/api/v2/dashboard').json()['clusters'] for sid in c['member_ids'])
 
 def test_demo_replay(client):
     client.post('/api/demo/reset')

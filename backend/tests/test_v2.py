@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 # Keep this module safe when run on its own, without the V1 test module.
 os.environ['SENTIMENT_MODE'] = 'fallback'
+os.environ['LIVE_NEWS_ON_STARTUP'] = '0'
 os.environ['DATABASE_URL'] = str(Path(__file__).resolve().parents[2] / 'work/test.db')
 from copy import deepcopy
 import pytest

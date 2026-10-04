@@ -9,6 +9,7 @@ from backend.services.intelligence import cluster_signals, clock_for, configurat
 from backend.services.propagation import propagate, heatmap, explain
 from backend.services.scenario_analysis import calculate, compare
 from backend.services.finance import exposure
+from backend.services.live_news import status as live_status
 
 router = APIRouter(prefix='/api/v2', tags=['V2 intelligence'])
 lock = threading.RLock()
@@ -16,6 +17,8 @@ lock = threading.RLock()
 def state():
     with lock:
         signals = store.all_rows('RiskSignal')
+        if live_status.get('mode') == 'live_news':
+            signals = [s for s in signals if not s['id'].startswith(('news_','social_posts_'))]
         as_of, clock = clock_for(signals)
         return cluster_signals(signals, as_of=as_of), store.all_rows('PortfolioAsset'), as_of, clock
 
@@ -62,6 +65,7 @@ def record_observation(signal):
 @router.get('/dashboard')
 def dashboard():
     clusters, assets, as_of, clock = state()
+    active_ids={sid for c in clusters for sid in c['member_ids']}
     summary = [{k:v for k,v in c.items() if k != 'members'} | {'weighted_exposure': exposure(c,assets)['weighted_exposure']} for c in clusters]
     selected = detail(clusters[0], assets) if clusters else None
     return {'clusters': summary, 'portfolio_value': sum(a['value'] for a in assets), 'assets': assets,
@@ -69,8 +73,8 @@ def dashboard():
             'high_impact_events': sum(c['raw_impact'] >= 8 for c in clusters),
             'observation_count': sum(c['observation_count'] for c in clusters),
             'summary': executive_summary(clusters), 'priority': selected, 'as_of': as_of, 'clock': clock,
-            'heatmap': heatmap(assets), 'history': store.all_rows('RiskHistory'),
-            'recent_tests': store.all_rows('StressTestResult')[-6:][::-1], 'config': configuration()}
+            'heatmap': heatmap(assets), 'history': [h for h in store.all_rows('RiskHistory') if h['signal_id'] in active_ids],
+            'recent_tests': [r for r in store.all_rows('StressTestResult') if r['signal_id'] in active_ids][-6:][::-1], 'config': configuration()}
 
 @router.get('/clusters')
 def clusters_api(): return state()[0]
@@ -100,7 +104,9 @@ def what_if(req: WhatIf):
     return calculate(c, scenario, assets, req.intensity, req.impact, req.exposure_scale, req.rate_shock, req.equity_shock)
 
 @router.get('/history')
-def history_api(): return store.all_rows('RiskHistory')
+def history_api():
+    active_ids={sid for c in state()[0] for sid in c['member_ids']}
+    return [h for h in store.all_rows('RiskHistory') if h['signal_id'] in active_ids]
 
 @router.get('/alerts')
 def alerts_api(level: str = 'ALL'):

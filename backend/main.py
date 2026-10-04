@@ -17,6 +17,7 @@ from backend import store
 from backend.services.nlp import clean, SentimentEngine, EventClassifier, entities
 from backend.services.finance import exposure, impact, stress, DEFAULT_WEIGHTS
 from backend import v2
+from backend.services.live_news import fetch_articles, status as live_status
 
 sentiment = None
 classifier = EventClassifier()
@@ -46,17 +47,20 @@ def get_weights():
         return json.loads(custom)
     return DEFAULT_WEIGHTS
 
-def analyze(req, item_id=None, timestamp=None):
+def analyze(req, item_id=None, timestamp=None, source_url=None):
     with v2.lock:
-        return _analyze(req,item_id,timestamp)
+        return _analyze(req,item_id,timestamp,source_url)
 
-def _analyze(req, item_id=None, timestamp=None):
+def _analyze(req, item_id=None, timestamp=None, source_url=None):
     started=time.perf_counter()
     text=clean(req.text)
     assets=store.all_rows('PortfolioAsset')
     signal={'id':item_id or str(uuid.uuid4()),'text':text,'headline':req.headline or text[:120],
             'source':req.source,'source_type':req.source_type,'timestamp':timestamp or datetime.now(timezone.utc).isoformat(),
             **sentiment.infer(text),**classifier.classify(text),**entities(text,assets)}
+    if source_url:
+        signal['source_url']=source_url
+        signal['ingested_at']=datetime.now(timezone.utc).isoformat()
     mapped=exposure(signal,assets)
     signal.update(impact(signal,mapped,text,get_weights()))
     signal['exposure']={k:v for k,v in mapped.items() if k!='assets'}
@@ -97,6 +101,8 @@ def next_demo():
     with demo_lock:
         items=demo_items()
         if demo_cursor>=len(items): return {'complete':True,'message':'Replay complete. Reset to replay.'}
+        if live_status.get('mode') != 'demo_fallback':
+            live_status.update(mode='synthetic demo',provider=None,reason=None)
         item=items[demo_cursor]; demo_cursor+=1
         return analyze(AnalyzeRequest(**{k:item[k] for k in ['text','source_type','source','headline']}),item['id'],item['timestamp'])
 
@@ -116,7 +122,9 @@ async def lifespan(app):
         for item in demo_items():
             if item['id'] not in known: break
             demo_cursor+=1
-    if not store.all_rows('RiskSignal'):
+    if os.getenv('LIVE_NEWS_ON_STARTUP','1') == '1':
+        live()
+    elif not store.all_rows('RiskSignal'):
         for _ in range(6): next_demo()
     yield
 
@@ -125,7 +133,14 @@ app.include_router(v2.router)
 app.add_middleware(CORSMiddleware,allow_origins=['http://localhost:3000','http://127.0.0.1:3000'],allow_methods=['GET','POST'],allow_headers=['Content-Type'])
 
 @app.get('/api/health')
-def health(): return {'status':'ok','sentiment_mode':sentiment.mode,'model_error':sentiment.error,'data_mode':'synthetic demo','offline_ready':True}
+def health():
+    signals=store.all_rows('RiskSignal')
+    live_count=sum(s['id'].startswith('live_') for s in signals)
+    demo_count=sum(s['id'].startswith(('news_','social_posts_')) for s in signals)
+    return {'status':'ok','sentiment_mode':sentiment.mode,'model_error':sentiment.error,
+            'data_mode':live_status.get('mode') or ('live_news' if live_count else 'synthetic demo'),
+            'live_provider':live_status.get('provider'), 'live_error':live_status.get('reason'),
+            'live_observations':live_count,'demo_observations':demo_count,'offline_ready':True}
 
 @app.post('/api/analyze')
 def analyze_api(req:AnalyzeRequest): return analyze(req)
@@ -181,25 +196,26 @@ def advance(): return next_demo()
 def reset():
     global demo_cursor
     with demo_lock, v2.lock:
+        live_status.clear()
         store.clear_demo(); demo_cursor=0
         for _ in range(6): next_demo()
     return {'status':'reset','records':6}
 
 @app.post('/api/ingest/live')
 def live():
-    key=os.getenv('NEWS_API_KEY')
-    if not key: return {'mode':'demo_fallback','reason':'NEWS_API_KEY is not configured','signal':next_demo()}
     try:
-        response=httpx.get('https://newsapi.org/v2/everything',params={'q':'finance economy','language':'en','pageSize':8},headers={'X-Api-Key':key},timeout=8)
-        response.raise_for_status()
-        articles=response.json().get('articles',[])
+        articles,provider=fetch_articles()
+    except RuntimeError as exc:
+        live_status.update(mode='demo_fallback',reason=str(exc),provider=None)
+        return {'mode':'demo_fallback','reason':str(exc),'signal':next_demo()}
+    with demo_lock, v2.lock:
+        known={s['id'] for s in store.all_rows('RiskSignal')}
+        unseen=[a for a in articles if a['id'] not in known]
         signals=[]
-        sentiment.infer_many([' '.join(str(a.get(k) or '') for k in ['title','description']) for a in articles])
-        for a in articles:
-            text=' '.join(str(a.get(k) or '') for k in ['title','description'])
-            if len(clean(text))<3: continue
-            signals.append(analyze(AnalyzeRequest(text=text,headline=(a.get('title') or '')[:400],source=(a.get('source',{}).get('name') or 'NewsAPI')[:200])))
-        if not signals: raise ValueError('External feed returned no usable articles')
-        return {'mode':'live_news','social_mode':'synthetic local social posts','signals':signals}
-    except Exception:
-        return {'mode':'demo_fallback','reason':'External news source unavailable or invalid','signal':next_demo()}
+        live_status.update(mode='live_news',provider=provider,reason=None)
+        sentiment.infer_many([a['text'] for a in unseen])
+        for a in unseen:
+            signals.append(analyze(AnalyzeRequest(text=a['text'],headline=a['headline'],source=a['source']),
+                                   item_id=a['id'],timestamp=a['timestamp'],source_url=a['url']))
+        return {'mode':'live_news','provider':provider,'social_mode':'synthetic local social posts',
+                'signals':signals,'new_count':len(signals),'already_seen':len(articles)-len(unseen)}

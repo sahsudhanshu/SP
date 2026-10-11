@@ -5,7 +5,7 @@ Real-Time Financial Risk Intelligence & Portfolio Stress Testing
 **Candidate Name:** Sudhanshu  
 **College Email ID:** iit2024081@iiita.ac.in  
 **College / Campus:** Indian Institute of Information Technology, Allahabad (IIITA)  
-**Demo Video Link:** _Pending — record the walkthrough, upload it to YouTube as Unlisted, confirm it plays in a private window, then paste the URL here before the deadline._  
+**Demo Video Link:** [https://youtu.be/LDvdLkTs5go](https://youtu.be/LDvdLkTs5go)  
 **Slide Deck Link (if hosted externally):** Not hosted externally. The submission deck is [docs/presentation.pdf](docs/presentation.pdf) in this repository.  
 
 ---
@@ -119,6 +119,7 @@ pytest backend/tests
 * **A loss that can be challenged:** Energy and the largest position reconcile to the portfolio total. Impact of 8 or above saves an automatic stress test. The what-if controls change assumptions, not the book. Display can switch between rupees and a USD scale.
 
 ### Deliverables & Reference Links
+* **Demo Video Walkthrough (10 mins):** [https://youtu.be/LDvdLkTs5go](https://youtu.be/LDvdLkTs5go)
 * **Architecture Diagram:** [docs/architecture.png](docs/architecture.png)
 * **Presentation Deck (7 slides):** [docs/presentation.pdf](docs/presentation.pdf)
 * **Dataset Documentation:** [data/README.md](data/README.md)

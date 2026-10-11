@@ -1,0 +1,14 @@
+.git
+.venv
+node_modules
+.next
+.models
+work
+__pycache__
+*.pyc
+*.tsbuildinfo
+*.log
+.pytest_cache
+docs/demo-script.md
+.env
+.env.local

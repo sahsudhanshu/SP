@@ -118,7 +118,8 @@ async def lifespan(app):
 
 app=FastAPI(title='RiskPulse AI',version='1.0.0',lifespan=lifespan)
 app.include_router(v2.router)
-app.add_middleware(CORSMiddleware,allow_origins=['http://localhost:3000','http://127.0.0.1:3000'],allow_methods=['GET','POST'],allow_headers=['Content-Type'])
+cors_origins = [o.strip() for o in os.getenv('ALLOWED_ORIGINS', '*').split(',')] if os.getenv('ALLOWED_ORIGINS') else ['*']
+app.add_middleware(CORSMiddleware,allow_origins=cors_origins,allow_credentials=True,allow_methods=['*'],allow_headers=['*'])
 
 @app.get('/api/health')
 def health():

@@ -122,4 +122,3 @@ pytest backend/tests
 * **Architecture Diagram:** [docs/architecture.png](docs/architecture.png)
 * **Presentation Deck (7 slides):** [docs/presentation.pdf](docs/presentation.pdf)
 * **Dataset Documentation:** [data/README.md](data/README.md)
-* **Submission Audit Checklist:** [docs/submission-audit.md](docs/submission-audit.md)

@@ -33,5 +33,5 @@
     "labels_identical": true,
     "max_score_difference": 0.0
   },
-  "caveats": "Small synthetic examples share rule vocabulary; no independent validation. Historical V1 timing is not a controlled comparison. Controlled arms alternate order, clear result caches and exclude model loading; batching may be slower on this CPU. Current pipeline includes batched NLP/entity/impact, excludes SQLite, HTTP and V2 fusion. Stress timing excludes SQLite; V1 stress timing included a scenario read. Fusion/graph total reported separately."
+  "caveats": "Small synthetic examples share rule vocabulary; no independent validation. Historical baseline timing is not a controlled comparison. Controlled arms alternate order, clear result caches and exclude model loading; batching may be slower on this CPU. Current pipeline includes batched NLP/entity/impact, excludes SQLite, HTTP and graph fusion. Stress timing excludes SQLite; baseline stress timing included a scenario read. Fusion/graph total reported separately."
 }

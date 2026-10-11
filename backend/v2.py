@@ -126,7 +126,7 @@ def evaluation_api():
     def read(name):
         p = store.ROOT/'docs'/name
         return json.loads(p.read_text()) if p.exists() else None
-    return {'baseline': read('metrics-v1.json'), 'current': read('metrics-v2.json'),
+    return {'baseline': read('metrics-baseline.json') or read('metrics-v1.json'), 'current': read('metrics-current.json') or read('metrics-v2.json'),
             'note': 'Small synthetic author-labelled dataset. Agreement is not independent validation. Latencies exclude model load.'}
 
 @router.get('/configuration')

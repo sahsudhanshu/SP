@@ -50,6 +50,6 @@ def evaluate():
                       'sequential_median_ms':statistics.median(sequential),'batched_median_ms':statistics.median(batched),
                       'warm_cache_ms_per_record':warm,'labels_identical':all(a['sentiment_label']==b['sentiment_label'] for a,b in zip(seq_output,batch_output)),
                       'max_score_difference':max(abs(a['sentiment_score']-b['sentiment_score']) for a,b in zip(seq_output,batch_output))},
-         'caveats':'Small synthetic examples share rule vocabulary; no independent validation. Historical V1 timing is not a controlled comparison. Controlled arms alternate order, clear result caches and exclude model loading; batching may be slower on this CPU. Current pipeline includes batched NLP/entity/impact, excludes SQLite, HTTP and V2 fusion. Stress timing excludes SQLite; V1 stress timing included a scenario read. Fusion/graph total reported separately.'}
-    (ROOT/'docs/metrics-v2.json').write_text(json.dumps(out,indent=2));print(json.dumps(out,indent=2))
+         'caveats':'Small synthetic examples share rule vocabulary; no independent validation. Historical baseline timing is not a controlled comparison. Controlled arms alternate order, clear result caches and exclude model loading; batching may be slower on this CPU. Current pipeline includes batched NLP/entity/impact, excludes SQLite, HTTP and graph fusion. Stress timing excludes SQLite; baseline stress timing included a scenario read. Fusion/graph total reported separately.'}
+    (ROOT/'docs/metrics-current.json').write_text(json.dumps(out,indent=2));print(json.dumps(out,indent=2))
 if __name__=='__main__': evaluate()

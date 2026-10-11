@@ -26,7 +26,7 @@ export default function RiskWorkspace(){
   const search=useSearchParams().toString(),path=usePathname().slice(1),title=nav.find(n=>n[0]===path)?.[1]||'Event intelligence';
   const [data,setData]=useState<Dashboard|null>(null),[detail,setDetail]=useState<Detail|null>(null),[selected,setSelected]=useState(''),[initialAsset,setInitialAsset]=useState('');
   const [error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[playing,setPlaying]=useState(false),[mode,setMode]=useState('CONNECTING'),[model,setModel]=useState('Connecting'),[query,setQuery]=useState(''),[level,setLevel]=useState('ALL'),[input,setInput]=useState(''),[source,setSource]=useState('news'),[evaluation,setEvaluation]=useState<Evaluation|null>(null);
-  const [theme,setTheme]=useState<'dark'|'light'>('dark');
+  const [theme,setTheme]=useState<'dark'|'light'>('light');
   const [currency,setCurrency]=useState<CurrencyMode>('INR');
   const selectedRef=useRef(''),detailVersion=useRef(0),operation=useRef(false);
 
@@ -37,7 +37,7 @@ export default function RiskWorkspace(){
       if(saved==='dark') document.documentElement.classList.add('dark');
       else document.documentElement.classList.remove('dark');
     }else{
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('dark');
     }
     const savedCurr=localStorage.getItem('riskpulse-currency') as CurrencyMode|null;
     if(savedCurr) setCurrency(savedCurr);
@@ -200,7 +200,7 @@ export default function RiskWorkspace(){
           <div>RiskPulse<span>PORTFOLIO INTELLIGENCE</span></div>
         </Link>
         <div className="workspace">
-          <span className="workspace-icon">V2</span>
+          <span className="workspace-icon">AI</span>
           <div>Risk analyst workspace<small>Wholesale banking · {currency==='INR'?'₹10 Cr book':'$100M book'}</small></div>
         </div>
         <nav>
@@ -335,7 +335,7 @@ export default function RiskWorkspace(){
                     <Panel title="Portfolio exposure" note={`Position value by sector · ${currency === 'INR' ? '₹ Crores' : 'USD Millions'}`}>
                       <Plot data={data.heatmap.sectors.map(sector=>({sector,value_M:data.assets.filter(a=>a.sector===sector).reduce((s,a)=>s+a.value,0)/1e6}))} x="sector" y="value_M" bar color="#38bdf8" currency={currency}/>
                     </Panel>
-                    <Panel title="Recent stress tests" note="Saved V1 calculations retain the original demo contract">
+                    <Panel title="Recent stress tests" note="Deterministic replay of scenario stress test executions">
                       {data.recent_tests.length ? (
                         <div className="recent-tests">
                           {data.recent_tests.map((r,i)=>(
@@ -549,7 +549,7 @@ export default function RiskWorkspace(){
                           ))}
                         </tbody>
                       </table>
-                      {!data.history.length&&<div className="empty">No V2 history yet. Reset and replay.</div>}
+                      {!data.history.length&&<div className="empty">No event history yet. Reset and replay.</div>}
                     </div>
                   </Panel>
                 </>
@@ -619,7 +619,7 @@ export default function RiskWorkspace(){
               )}
 
               {path==='evaluation' && (
-                <Panel title="Measured diagnostics: V1 → V2" note={evaluation?.note||'Loading measured results…'}>
+                <Panel title="Measured diagnostics: Baseline vs FinBERT Engine" note={evaluation?.note||'Loading measured results…'}>
                   {evaluation ? (
                     <div className="audit-body" style={{padding: '14px 24px 24px'}}>
                       <div className="alert">24 synthetic author-labelled records, including paired copies. No claim of real-world predictive accuracy.</div>
@@ -651,7 +651,7 @@ export default function RiskWorkspace(){
                       </div>
                       <h3 style={{marginTop: 24, marginBottom: 12}}>Controlled sequential vs batched inference</h3>
                       <pre style={{whiteSpace: 'pre-wrap', padding: 14, background: 'rgba(0,0,0,0.2)', border: '1px solid var(--line)', borderRadius: 8, fontFamily: 'var(--font-mono)', fontSize: 11}}>
-                        {evaluation.current?JSON.stringify(evaluation.current.benchmark,null,2):'Not measured yet. Run scripts/evaluate_v2.py.'}
+                        {evaluation.current?JSON.stringify(evaluation.current.benchmark,null,2):'Not measured yet. Run scripts/evaluate.py.'}
                       </pre>
                       <p>{String(evaluation.current?.caveats||'')}</p>
                     </div>
@@ -665,7 +665,7 @@ export default function RiskWorkspace(){
 
           <footer>
             <span>SYNTHETIC PORTFOLIO · SYNTHETIC STRESS ASSUMPTIONS · PROTOTYPE RISK MODEL</span>
-            <span>RiskPulse AI · Obsidian Edition</span>
+            <span>RiskPulse AI · Institutional Risk Intelligence</span>
           </footer>
         </div>
       </main>

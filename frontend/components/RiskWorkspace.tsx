@@ -2,10 +2,10 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import Link from 'next/link';
 import {usePathname,useSearchParams} from 'next/navigation';
-import {Activity,ArrowRight,Radio,Network,FlaskConical,Layers,History,ShieldAlert,Grid3X3,FileSearch,ChartNoAxesCombined,RotateCcw,Play,Pause,Globe,Zap,Download,Sun,Moon} from 'lucide-react';
+import {Activity,ArrowRight,Radio,Network,FlaskConical,Layers,History,ShieldAlert,Grid3X3,FileSearch,ChartNoAxesCombined,RotateCcw,Play,Pause,Globe,Zap,Download,Sun,Moon,Coins,ChevronRight} from 'lucide-react';
 import {request} from '@/lib/api';
 import type {Cluster,Dashboard,Detail} from '@/lib/v2-types';
-import {money,label,Badge,Panel,Metric,Plot,Explanation,Transmission,StressLab} from './RiskVisuals';
+import {money,label,Badge,Panel,Metric,Plot,Explanation,Transmission,StressLab,type CurrencyMode} from './RiskVisuals';
 
 const nav=[
   ['','Overview',Activity],
@@ -27,6 +27,7 @@ export default function RiskWorkspace(){
   const [data,setData]=useState<Dashboard|null>(null),[detail,setDetail]=useState<Detail|null>(null),[selected,setSelected]=useState(''),[initialAsset,setInitialAsset]=useState('');
   const [error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[playing,setPlaying]=useState(false),[mode,setMode]=useState('CONNECTING'),[model,setModel]=useState('Connecting'),[query,setQuery]=useState(''),[level,setLevel]=useState('ALL'),[input,setInput]=useState(''),[source,setSource]=useState('news'),[evaluation,setEvaluation]=useState<Evaluation|null>(null);
   const [theme,setTheme]=useState<'dark'|'light'>('dark');
+  const [currency,setCurrency]=useState<CurrencyMode>('INR');
   const selectedRef=useRef(''),detailVersion=useRef(0),operation=useRef(false);
 
   useEffect(()=>{
@@ -38,6 +39,8 @@ export default function RiskWorkspace(){
     }else{
       document.documentElement.classList.add('dark');
     }
+    const savedCurr=localStorage.getItem('riskpulse-currency') as CurrencyMode|null;
+    if(savedCurr) setCurrency(savedCurr);
   },[]);
 
   const toggleTheme=()=>{
@@ -46,6 +49,12 @@ export default function RiskWorkspace(){
     localStorage.setItem('riskpulse-theme',next);
     if(next==='dark') document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
+  };
+
+  const toggleCurrency=()=>{
+    const next: CurrencyMode = currency==='INR'?'USD':'INR';
+    setCurrency(next);
+    localStorage.setItem('riskpulse-currency',next);
   };
 
   const refresh=useCallback(async()=>{
@@ -169,7 +178,7 @@ export default function RiskWorkspace(){
               <td><span style={{fontFamily: 'var(--font-mono)'}}>{c.raw_impact.toFixed(2)}</span></td>
               <td><span style={{fontFamily: 'var(--font-mono)'}}>{(c.confidence*100).toFixed(1)}%</span></td>
               <td><Badge value={c.risk_level}/><small style={{fontFamily: 'var(--font-mono)'}}>{c.effective_risk.toFixed(2)} / 10</small></td>
-              <td><span style={{fontFamily: 'var(--font-mono)'}}>{money(c.weighted_exposure||0)}</span></td>
+              <td><span style={{fontFamily: 'var(--font-mono)'}}>{money(c.weighted_exposure||0, currency)}</span></td>
               <td>
                 <Link className="text-button" href={`/risk-feed?event=${c.id}`}>Inspect</Link>
                 <span style={{color: 'var(--line)', margin: '0 6px'}}>|</span>
@@ -192,7 +201,7 @@ export default function RiskWorkspace(){
         </Link>
         <div className="workspace">
           <span className="workspace-icon">V2</span>
-          <div>Risk analyst workspace<small>Wholesale banking · INR 100M</small></div>
+          <div>Risk analyst workspace<small>Wholesale banking · {currency==='INR'?'₹10 Cr book':'$100M book'}</small></div>
         </div>
         <nav>
           {nav.map(([route,name,Icon])=>(
@@ -221,6 +230,16 @@ export default function RiskWorkspace(){
             <span className={`dot ${error?'offline':isLive?'radar':''}`}/>
             {error?'Connection interrupted':model==='Connecting'?'Connecting':`Local model · ${model}`}
             <button
+              id="currency-toggle"
+              className="theme-toggle-btn"
+              onClick={toggleCurrency}
+              aria-label={`Switch to ${currency==='INR'?'USD ($)':'INR (₹)'}`}
+              title="Toggle display currency (INR Cr/L vs USD M/K)"
+            >
+              <Coins size={14} style={{color: currency === 'INR' ? '#10b981' : '#38bdf8'}}/>
+              <span>{currency === 'INR' ? '₹ INR (Cr / L)' : '$ USD (M)'}</span>
+            </button>
+            <button
               id="theme-toggle"
               className="theme-toggle-btn"
               onClick={toggleTheme}
@@ -235,7 +254,17 @@ export default function RiskWorkspace(){
         <div className="content">
           <div className="page-head">
             <div>
-              <div className="eyebrow">SIGNAL → INTELLIGENCE → EXPOSURE → STRESS → IMPACT</div>
+              <div className="workflow-stepper">
+                <span className="step-pill active">SIGNAL</span>
+                <ChevronRight size={11} className="step-sep"/>
+                <span className="step-pill">INTELLIGENCE</span>
+                <ChevronRight size={11} className="step-sep"/>
+                <span className="step-pill">EXPOSURE</span>
+                <ChevronRight size={11} className="step-sep"/>
+                <span className="step-pill">STRESS</span>
+                <ChevronRight size={11} className="step-sep"/>
+                <span className="step-pill">IMPACT</span>
+              </div>
               <h1>{path==='risk-map'?'Risk transmission map':path===''?'Portfolio risk command center':title}</h1>
               <p>Trace every decision from its source to the portfolio.</p>
             </div>
@@ -287,10 +316,10 @@ export default function RiskWorkspace(){
                   </div>
 
                   <div className="metrics">
-                    <Metric title="Portfolio value" value={money(data.portfolio_value)} note={`${data.assets.length} synthetic positions`}/>
+                    <Metric title="Portfolio value" value={money(data.portfolio_value, currency)} note={`${data.assets.length} synthetic positions`}/>
                     <Metric title="Current risk" value={`${data.current_risk.toFixed(2)} / 10`} note="Highest confidence-adjusted event risk"/>
                     <Metric title="High-impact events" value={`${data.high_impact_events}`} note="Unique clusters with raw impact ≥ 8"/>
-                    <Metric title="Estimated stress loss" value={money(data.priority?.result?.absolute_loss||0)} note="Priority event · moderate conditional scenario"/>
+                    <Metric title="Estimated stress loss" value={money(data.priority?.result?.absolute_loss||0, currency)} note="Priority event · moderate conditional scenario"/>
                   </div>
 
                   <Panel title="Live signal feed" note="Copied observations are collapsed before prioritization" action={<Link className="text-button" href="/risk-feed">All events →</Link>}>
@@ -299,13 +328,13 @@ export default function RiskWorkspace(){
 
                   {detail && (
                     <Panel title="Where the risk goes" note={`${label(detail.cluster.event_type)} · actual portfolio transmission paths`} action={<Link className="text-button" href={`/risk-map?event=${detail.cluster.id}`}>Inspect risk map →</Link>}>
-                      <Transmission graph={detail.graph} compact/>
+                      <Transmission graph={detail.graph} compact isDark={theme==='dark'} currency={currency}/>
                     </Panel>
                   )}
 
                   <div className="grid-equal">
-                    <Panel title="Portfolio exposure" note="Position value by sector · INR millions">
-                      <Plot data={data.heatmap.sectors.map(sector=>({sector,value_M:data.assets.filter(a=>a.sector===sector).reduce((s,a)=>s+a.value,0)/1e6}))} x="sector" y="value_M" bar/>
+                    <Panel title="Portfolio exposure" note={`Position value by sector · ${currency === 'INR' ? '₹ Crores' : 'USD Millions'}`}>
+                      <Plot data={data.heatmap.sectors.map(sector=>({sector,value_M:data.assets.filter(a=>a.sector===sector).reduce((s,a)=>s+a.value,0)/1e6}))} x="sector" y="value_M" bar color="#38bdf8" currency={currency}/>
                     </Panel>
                     <Panel title="Recent stress tests" note="Saved V1 calculations retain the original demo contract">
                       {data.recent_tests.length ? (
@@ -313,7 +342,7 @@ export default function RiskWorkspace(){
                           {data.recent_tests.map((r,i)=>(
                             <div key={i} style={{padding: '14px 0', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                               <span><b>{label(r.event_type)}</b><small style={{display: 'block', color: 'var(--text-muted)'}}>{r.signal_id}</small></span>
-                              <b style={{color: '#f43f5e', fontFamily: 'var(--font-mono)'}}>{money(r.absolute_loss)}</b>
+                              <b style={{color: '#f43f5e', fontFamily: 'var(--font-mono)'}}>{money(r.absolute_loss, currency)}</b>
                             </div>
                           ))}
                         </div>
@@ -381,8 +410,8 @@ export default function RiskWorkspace(){
                           <div><dt style={{color: 'var(--text-muted)', fontSize: 10, textTransform: 'uppercase'}}>Source agreement</dt><dd style={{fontSize: 16, fontWeight: 700, fontFamily: 'var(--font-mono)', margin: '4px 0 0'}}>{(detail.cluster.source_agreement*100).toFixed(1)}%</dd></div>
                           <div><dt style={{color: 'var(--text-muted)', fontSize: 10, textTransform: 'uppercase'}}>Sources / distinct texts / copies</dt><dd style={{fontSize: 16, fontWeight: 700, fontFamily: 'var(--font-mono)', margin: '4px 0 0'}}>{detail.cluster.source_count} / {detail.cluster.distinct_evidence_count} / {detail.cluster.duplicate_count}</dd></div>
                           <div><dt style={{color: 'var(--text-muted)', fontSize: 10, textTransform: 'uppercase'}}>Who is affected</dt><dd style={{fontSize: 14, fontWeight: 600, margin: '4px 0 0'}}>{detail.cluster.companies.join(', ')||detail.cluster.affected_sectors.join(', ')||'No direct match'}</dd></div>
-                          <div><dt style={{color: 'var(--text-muted)', fontSize: 10, textTransform: 'uppercase'}}>Weighted portfolio exposure</dt><dd style={{fontSize: 16, fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)', margin: '4px 0 0'}}>{money(detail.graph.exposure.weighted_exposure)}</dd></div>
-                          <div><dt style={{color: 'var(--text-muted)', fontSize: 10, textTransform: 'uppercase'}}>Conditional scenario loss</dt><dd style={{fontSize: 16, fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f43f5e', margin: '4px 0 0'}}>{money(detail.result?.absolute_loss||0)}</dd></div>
+                          <div><dt style={{color: 'var(--text-muted)', fontSize: 10, textTransform: 'uppercase'}}>Weighted portfolio exposure</dt><dd style={{fontSize: 16, fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)', margin: '4px 0 0'}}>{money(detail.graph.exposure.weighted_exposure, currency)}</dd></div>
+                          <div><dt style={{color: 'var(--text-muted)', fontSize: 10, textTransform: 'uppercase'}}>Conditional scenario loss</dt><dd style={{fontSize: 16, fontWeight: 700, fontFamily: 'var(--font-mono)', color: '#f43f5e', margin: '4px 0 0'}}>{money(detail.result?.absolute_loss||0, currency)}</dd></div>
                         </dl>
                         <p className="formula">{detail.cluster.independence_note}</p>
                       </Panel>
@@ -395,13 +424,13 @@ export default function RiskWorkspace(){
               {path==='risk-map' && detail && (
                 <>
                   <div className="metrics">
-                    <Metric title="Direct exposure" value={money(detail.graph.exposure.direct_exposure)} note="Issuer and sector matches"/>
-                    <Metric title="Weighted exposure" value={money(detail.graph.exposure.weighted_exposure)} note="Includes systemic spillover"/>
+                    <Metric title="Direct exposure" value={money(detail.graph.exposure.direct_exposure, currency)} note="Issuer and sector matches"/>
+                    <Metric title="Weighted exposure" value={money(detail.graph.exposure.weighted_exposure, currency)} note="Includes systemic spillover"/>
                     <Metric title="Propagated risk" value={detail.graph.total_propagated_risk.toFixed(3)} note="Portfolio risk points"/>
-                    <Metric title="Moderate scenario loss" value={money(detail.result?.absolute_loss||0)} note="Conditional synthetic result"/>
+                    <Metric title="Moderate scenario loss" value={money(detail.result?.absolute_loss||0, currency)} note="Conditional synthetic result"/>
                   </div>
                   <Panel title={label(detail.cluster.event_type)} note={detail.cluster.headline}>
-                    <Transmission graph={detail.graph} initialAsset={initialAsset}/>
+                    <Transmission graph={detail.graph} initialAsset={initialAsset} isDark={theme==='dark'} currency={currency}/>
                   </Panel>
                   <Explanation detail={detail}/>
                   <Panel title="Transmission ledger" note="Exactly one path per position">
@@ -423,7 +452,7 @@ export default function RiskWorkspace(){
                               <td>{p.reason}</td>
                               <td><span style={{fontFamily: 'var(--font-mono)'}}>{p.weights.map(w=>w.toFixed(2)).join(' × ')}</span></td>
                               <td><span style={{fontFamily: 'var(--font-mono)'}}>{p.propagated_risk.toFixed(4)}</span></td>
-                              <td><b style={{fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)'}}>{money(p.weighted_exposure)}</b></td>
+                              <td><b style={{fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)'}}>{money(p.weighted_exposure, currency)}</b></td>
                             </tr>
                           ))}
                         </tbody>
@@ -435,7 +464,7 @@ export default function RiskWorkspace(){
               )}
 
               {path==='stress-testing' && detail && (
-                <StressLab key={`${detail.cluster.id}:${detail.cluster.observation_count}`} detail={detail}/>
+                <StressLab key={`${detail.cluster.id}:${detail.cluster.observation_count}`} detail={detail} currency={currency}/>
               )}
 
               {path==='portfolio' && detail && (
@@ -463,7 +492,7 @@ export default function RiskWorkspace(){
                               </td>
                               <td>{a.asset_type}</td>
                               <td>{a.sector}</td>
-                              <td><span style={{fontFamily: 'var(--font-mono)'}}>{money(a.value)}</span></td>
+                              <td><span style={{fontFamily: 'var(--font-mono)'}}>{money(a.value, currency)}</span></td>
                               <td><span style={{fontFamily: 'var(--font-mono)'}}>{a.sensitivities[detail.cluster.event_type]||0}</span></td>
                               <td><span style={{fontFamily: 'var(--font-mono)'}}>{(100*a.value/data.portfolio_value).toFixed(1)}%</span></td>
                             </tr>
@@ -486,7 +515,7 @@ export default function RiskWorkspace(){
                       ['loss_M','Arrival-event scenario loss · INR M']
                     ].map(([key,name])=>(
                       <Panel key={key} title={name} note="Persisted arrival snapshots · observation sequence">
-                        <Plot data={data.history.map(h=>({...h,loss_M:h.portfolio_loss/1e6}))} x="sequence" y={key}/>
+                        <Plot data={data.history.map(h=>({...h,loss_M:h.portfolio_loss/1e6}))} x="sequence" y={key} currency={currency}/>
                       </Panel>
                     ))}
                   </div>
@@ -516,7 +545,7 @@ export default function RiskWorkspace(){
                               <td><span style={{fontFamily: 'var(--font-mono)'}}>{h.sentiment.toFixed(3)}</span></td>
                               <td><span style={{fontFamily: 'var(--font-mono)'}}>{h.impact.toFixed(2)}</span></td>
                               <td>{h.source_count}<small>{h.sectors.join(', ')}</small></td>
-                              <td><b style={{color: '#f43f5e', fontFamily: 'var(--font-mono)'}}>{money(h.portfolio_loss)}</b></td>
+                              <td><b style={{color: '#f43f5e', fontFamily: 'var(--font-mono)'}}>{money(h.portfolio_loss, currency)}</b></td>
                             </tr>
                           ))}
                         </tbody>
@@ -547,7 +576,7 @@ export default function RiskWorkspace(){
                                 <td key={e}>
                                   <div style={{background:`rgba(56,189,248,${0.06+cell.score*0.06})`, border: '1px solid rgba(56,189,248,0.15)'}}>
                                     <b>{cell.score.toFixed(1)}</b>
-                                    <small>{money(cell.sensitivity_weighted_exposure)}</small>
+                                    <small>{money(cell.sensitivity_weighted_exposure, currency)}</small>
                                   </div>
                                 </td>
                               );

@@ -6,8 +6,31 @@ import {ResponsiveContainer,BarChart,Bar,AreaChart,Area,XAxis,YAxis,CartesianGri
 import {request} from '@/lib/api';
 import type {Detail,Graph,GraphNode,Result} from '@/lib/v2-types';
 
-export const money=(n:number)=>`₹${(n/1e6).toFixed(3)}M`;
-export const label=(s:string)=>s.replaceAll('_',' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
+export type CurrencyMode = 'INR' | 'USD';
+
+export const money = (n: number, currency: CurrencyMode = 'INR') => {
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : '';
+  if (currency === 'INR') {
+    if (abs >= 1e7) {
+      return `${sign}₹${(abs / 1e7).toFixed(2)} Cr`;
+    } else if (abs >= 1e5) {
+      return `${sign}₹${(abs / 1e5).toFixed(2)} L`;
+    } else if (abs >= 1e3) {
+      return `${sign}₹${(abs / 1e3).toFixed(1)} K`;
+    }
+    return `${sign}₹${abs.toFixed(0)}`;
+  } else {
+    if (abs >= 1e6) {
+      return `${sign}$${(abs / 1e6).toFixed(2)}M`;
+    } else if (abs >= 1e3) {
+      return `${sign}$${(abs / 1e3).toFixed(1)}K`;
+    }
+    return `${sign}$${abs.toFixed(0)}`;
+  }
+};
+
+export const label = (s: string) => s.replaceAll('_',' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
 
 export function Badge({value}:{value:string}){
   return (
@@ -43,25 +66,47 @@ export function Metric({title,value,note}:{title:string;value:string;note:string
   );
 }
 
-export function Plot({data,x,y,bar=false,color='#38bdf8'}:{data:Record<string,unknown>[];x:string;y:string;bar?:boolean;color?:string}){
+export function Plot({
+  data,
+  x,
+  y,
+  bar=false,
+  color='#38bdf8',
+  currency='INR'
+}:{
+  data:Record<string,unknown>[];
+  x:string;
+  y:string;
+  bar?:boolean;
+  color?:string;
+  currency?:CurrencyMode;
+}){
   return (
     <div className="chart v2chart">
       <ResponsiveContainer width="100%" height="100%">
         {bar ? (
           <BarChart data={data} margin={{left:8,right:18,bottom:10}}>
-            <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.06)" />
-            <XAxis dataKey={x} tick={{fontSize:10, fill: '#8899b0'}} axisLine={false} tickLine={false}/>
-            <YAxis tick={{fontSize:10, fill: '#8899b0'}} width={44} axisLine={false} tickLine={false}/>
+            <CartesianGrid vertical={false} stroke="var(--line)" />
+            <XAxis dataKey={x} tick={{fontSize:10, fill: 'var(--text-muted)'}} axisLine={false} tickLine={false}/>
+            <YAxis tick={{fontSize:10, fill: 'var(--text-muted)'}} width={44} axisLine={false} tickLine={false}/>
             <Tooltip
+              cursor={{ fill: 'var(--chart-cursor, rgba(56, 189, 248, 0.08))' }}
               contentStyle={{
-                backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                borderColor: 'rgba(56, 189, 248, 0.3)',
-                borderRadius: '8px',
-                color: '#f8fafc',
+                backgroundColor: 'var(--tooltip-bg, rgba(15, 23, 42, 0.95))',
+                borderColor: 'var(--tooltip-border, rgba(56, 189, 248, 0.3))',
+                borderRadius: '10px',
+                color: 'var(--tooltip-text, #f8fafc)',
                 fontSize: '12px',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-                backdropFilter: 'blur(10px)'
+                boxShadow: 'var(--card-shadow)',
+                backdropFilter: 'blur(12px)'
               }}
+              formatter={(val: unknown) => [
+                typeof val === 'number'
+                  ? (currency === 'INR' ? `₹${(val / 10).toFixed(2)} Cr` : `$${val.toFixed(2)}M`)
+                  : String(val ?? ''),
+                'Portfolio Exposure'
+              ]}
+              labelFormatter={(lbl) => `Sector: ${lbl}`}
             />
             <Bar isAnimationActive={true} animationDuration={700} dataKey={y} fill={color} radius={[6,6,0,0]}/>
           </BarChart>
@@ -73,19 +118,27 @@ export function Plot({data,x,y,bar=false,color='#38bdf8'}:{data:Record<string,un
                 <stop offset="95%" stopColor={color} stopOpacity={0.0}/>
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.06)" />
-            <XAxis dataKey={x} tick={{fontSize:10, fill: '#8899b0'}} axisLine={false} tickLine={false}/>
-            <YAxis tick={{fontSize:10, fill: '#8899b0'}} width={44} axisLine={false} tickLine={false}/>
+            <CartesianGrid vertical={false} stroke="var(--line)" />
+            <XAxis dataKey={x} tick={{fontSize:10, fill: 'var(--text-muted)'}} axisLine={false} tickLine={false}/>
+            <YAxis tick={{fontSize:10, fill: 'var(--text-muted)'}} width={44} axisLine={false} tickLine={false}/>
             <Tooltip
+              cursor={{ stroke: 'var(--line)' }}
               contentStyle={{
-                backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                borderColor: 'rgba(56, 189, 248, 0.3)',
-                borderRadius: '8px',
-                color: '#f8fafc',
+                backgroundColor: 'var(--tooltip-bg, rgba(15, 23, 42, 0.95))',
+                borderColor: 'var(--tooltip-border, rgba(56, 189, 248, 0.3))',
+                borderRadius: '10px',
+                color: 'var(--tooltip-text, #f8fafc)',
                 fontSize: '12px',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-                backdropFilter: 'blur(10px)'
+                boxShadow: 'var(--card-shadow)',
+                backdropFilter: 'blur(12px)'
               }}
+              formatter={(val: unknown) => [
+                typeof val === 'number'
+                  ? (currency === 'INR' ? `₹${(val / 10).toFixed(2)} Cr` : `$${val.toFixed(2)}M`)
+                  : String(val ?? ''),
+                'Value'
+              ]}
+              labelFormatter={(lbl) => `Point: ${lbl}`}
             />
             <Area isAnimationActive={true} animationDuration={800} dataKey={y} stroke={color} fill={`url(#areaGrad-${color.replace('#','')})`} strokeWidth={2.5} type="monotone"/>
           </AreaChart>
@@ -105,7 +158,19 @@ export function Explanation({detail}:{detail:Detail}){
   );
 }
 
-export function Transmission({graph,initialAsset,compact=false}:{graph:Graph;initialAsset?:string;compact?:boolean}){
+export function Transmission({
+  graph,
+  initialAsset,
+  compact=false,
+  isDark=true,
+  currency='INR'
+}:{
+  graph:Graph;
+  initialAsset?:string;
+  compact?:boolean;
+  isDark?:boolean;
+  currency?:CurrencyMode;
+}){
   const [selected,setSelected]=useState<GraphNode|null>(null);
   useEffect(()=>{
     setSelected(old=>graph.nodes.find(n=>n.id===(old?.id||`asset:${initialAsset}`))||null);
@@ -124,10 +189,15 @@ export function Transmission({graph,initialAsset,compact=false}:{graph:Graph;ini
       <div className="map-wrap">
         <svg className={compact?'transmission compact':'transmission'} viewBox="0 0 1100 590" role="group" aria-label="Computed event to portfolio risk transmission graph">
           <defs>
-            <linearGradient id="activeBeam" x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id="activeBeamDark" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#38bdf8" />
               <stop offset="50%" stopColor="#818cf8" />
               <stop offset="100%" stopColor="#f43f5e" />
+            </linearGradient>
+            <linearGradient id="activeBeamLight" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#0284c7" />
+              <stop offset="50%" stopColor="#6366f1" />
+              <stop offset="100%" stopColor="#e11d48" />
             </linearGradient>
             <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur stdDeviation="2.5" result="blur" />
@@ -148,12 +218,15 @@ export function Transmission({graph,initialAsset,compact=false}:{graph:Graph;ini
           {/* Static Background Edges */}
           {graph.edges.map((e,i)=>{
             const a=positions.get(e.source)!,b=positions.get(e.target)!,enabled=active.has(e.source)&&active.has(e.target);
+            const edgeColor = isDark
+              ? (enabled ? 'rgba(56, 189, 248, 0.35)' : 'rgba(255, 255, 255, 0.08)')
+              : (enabled ? 'rgba(2, 132, 199, 0.35)' : 'rgba(203, 213, 225, 0.7)');
             return (
               <path
                 key={`base-${i}`}
                 d={`M${a.x+174},${a.y} C${a.x+203},${a.y} ${b.x-25},${b.y} ${b.x},${b.y}`}
                 fill="none"
-                stroke={enabled?'rgba(56, 189, 248, 0.35)':'rgba(255, 255, 255, 0.08)'}
+                stroke={edgeColor}
                 strokeWidth={1+e.weight*1.5}
               >
                 <title>{e.meaning}: {e.weight.toFixed(3)}</title>
@@ -170,7 +243,7 @@ export function Transmission({graph,initialAsset,compact=false}:{graph:Graph;ini
                 key={`beam-${i}`}
                 d={`M${a.x+174},${a.y} C${a.x+203},${a.y} ${b.x-25},${b.y} ${b.x},${b.y}`}
                 fill="none"
-                stroke="url(#activeBeam)"
+                stroke={isDark ? "url(#activeBeamDark)" : "url(#activeBeamLight)"}
                 strokeWidth={2+e.weight*1.8}
                 className="flow-beam"
                 filter="url(#neonGlow)"
@@ -178,12 +251,24 @@ export function Transmission({graph,initialAsset,compact=false}:{graph:Graph;ini
             );
           })}
 
-          {/* Interactive Nodes */}
+          {/* Interactive Nodes (Theme Aware) */}
           {graph.nodes.map(n=>{
             const p=positions.get(n.id)!;
             const isSel = selected?.id === n.id;
-            const nodeFill = isSel ? 'rgba(56, 189, 248, 0.25)' : n.type === 'asset' ? 'rgba(30, 41, 59, 0.7)' : 'rgba(15, 23, 42, 0.85)';
-            const nodeStroke = isSel ? '#38bdf8' : active.has(n.id) ? 'rgba(56, 189, 248, 0.5)' : 'rgba(255, 255, 255, 0.12)';
+            
+            let nodeFill: string;
+            let nodeStroke: string;
+            let textFill: string;
+
+            if (isDark) {
+              nodeFill = isSel ? 'rgba(56, 189, 248, 0.25)' : n.type === 'asset' ? 'rgba(30, 41, 59, 0.75)' : 'rgba(15, 23, 42, 0.85)';
+              nodeStroke = isSel ? '#38bdf8' : active.has(n.id) ? 'rgba(56, 189, 248, 0.5)' : 'rgba(255, 255, 255, 0.12)';
+              textFill = isSel ? '#ffffff' : active.has(n.id) ? '#38bdf8' : '#cbd5e1';
+            } else {
+              nodeFill = isSel ? 'rgba(2, 132, 199, 0.12)' : n.type === 'asset' ? '#f8fafc' : '#ffffff';
+              nodeStroke = isSel ? '#0284c7' : active.has(n.id) ? '#38bdf8' : '#cbd5e1';
+              textFill = isSel ? '#0284c7' : active.has(n.id) ? '#0f172a' : '#334155';
+            }
 
             return (
               <g
@@ -209,11 +294,11 @@ export function Transmission({graph,initialAsset,compact=false}:{graph:Graph;ini
                 <text
                   x={p.x+10}
                   y={p.y+4}
-                  fill={isSel ? '#ffffff' : active.has(n.id) ? '#38bdf8' : '#cbd5e1'}
+                  fill={textFill}
                   fontSize={11}
-                  fontWeight={isSel ? 700 : 500}
+                  fontWeight={isSel ? 700 : 600}
                 >
-                  {n.type==='asset'?`${n.label} · ${money(n.value||0)}`:label(n.label).slice(0,24)}
+                  {n.type==='asset'?`${n.label} · ${money(n.value||0, currency)}`:label(n.label).slice(0,24)}
                 </text>
                 <title>{n.label} · click to inspect evidence and transmission</title>
               </g>
@@ -225,7 +310,7 @@ export function Transmission({graph,initialAsset,compact=false}:{graph:Graph;ini
       <div className="map-footer">
         <span><b>{graph.risk_paths.length}</b> unique asset paths</span>
         <b>{graph.total_propagated_risk.toFixed(3)} portfolio risk points</b>
-        <span>Weighted exposure <b>{money(graph.exposure.weighted_exposure)}</b></span>
+        <span>Weighted exposure <b>{money(graph.exposure.weighted_exposure, currency)}</b></span>
       </div>
 
       {selected ? (
@@ -238,11 +323,11 @@ export function Transmission({graph,initialAsset,compact=false}:{graph:Graph;ini
           {selected.type==='asset' ? (
             <dl className="node-values">
               {[
-                ['Asset value',money(selected.value||0)],
+                ['Asset value',money(selected.value||0, currency)],
                 ['Sector',selected.sector],
                 ['Sensitivity',(selected.sensitivity||0).toFixed(2)],
-                ['Event exposure',money(selected.event_exposure||0)],
-                ['Scenario loss',money(selected.scenario_loss||0)],
+                ['Event exposure',money(selected.event_exposure||0, currency)],
+                ['Scenario loss',money(selected.scenario_loss||0, currency)],
                 ['Portfolio weight',`${((selected.portfolio_weight||0)*100).toFixed(1)}%`]
               ].map(([k,v])=>(
                 <div key={k}>
@@ -253,7 +338,7 @@ export function Transmission({graph,initialAsset,compact=false}:{graph:Graph;ini
             </dl>
           ) : (
             <p style={{alignSelf: 'center', fontFamily: 'var(--font-mono)'}}>
-              <b>{paths.length}</b> connected asset paths · <b>{money(paths.reduce((s,p)=>s+p.weighted_exposure,0))}</b> weighted exposure
+              <b>{paths.length}</b> connected asset paths · <b>{money(paths.reduce((s,p)=>s+p.weighted_exposure,0), currency)}</b> weighted exposure
             </p>
           )}
         </div>
@@ -266,28 +351,36 @@ export function Transmission({graph,initialAsset,compact=false}:{graph:Graph;ini
   );
 }
 
-export function Attribution({result,cid}:{result:Result;cid:string}){
+export function Attribution({
+  result,
+  cid,
+  currency='INR'
+}:{
+  result:Result;
+  cid:string;
+  currency?:CurrencyMode;
+}){
   return (
     <>
       <div className="grid-equal">
-        <Panel title="Loss attribution by sector" note="Signed conditional loss · INR millions">
-          <Plot data={result.sector_losses.map(x=>({...x,loss_M:x.loss/1e6}))} x="sector" y="loss_M" bar color="#f43f5e"/>
+        <Panel title="Loss attribution by sector" note="Signed conditional loss">
+          <Plot data={result.sector_losses.map(x=>({...x,loss_M:x.loss/1e6}))} x="sector" y="loss_M" bar color="#f43f5e" currency={currency}/>
         </Panel>
         <Panel title="Scenario outcome" note="Reconciled from individual positions">
           <div className="outcome">
             <div>
               <span>Portfolio before</span>
-              <b>{money(result.portfolio_before)}</b>
+              <b>{money(result.portfolio_before, currency)}</b>
             </div>
             <ArrowRight size={22} style={{color: '#38bdf8', filter: 'drop-shadow(0 0 6px rgba(56, 189, 248, 0.5))'}}/>
             <div>
               <span>Portfolio after</span>
-              <b>{money(result.portfolio_after)}</b>
+              <b>{money(result.portfolio_after, currency)}</b>
             </div>
           </div>
           <div className="loss-callout">
             <span>Conditional {result.absolute_loss<0?'gain':'drawdown loss'}</span>
-            <strong>{money(Math.abs(result.absolute_loss))}</strong>
+            <strong>{money(Math.abs(result.absolute_loss), currency)}</strong>
             <small>{result.loss_percentage.toFixed(3)}% signed scenario loss · synthetic wholesale assumptions</small>
           </div>
         </Panel>
@@ -317,7 +410,7 @@ export function Attribution({result,cid}:{result:Result;cid:string}){
                   <td>{a.sector}</td>
                   <td><span style={{fontFamily: 'var(--font-mono)'}}>{a.sensitivity.toFixed(2)}</span></td>
                   <td><span style={{fontFamily: 'var(--font-mono)'}}>{a.mapping_weight.toFixed(2)}</span></td>
-                  <td><b style={{color: '#f43f5e', fontFamily: 'var(--font-mono)'}}>{money(a.loss)}</b></td>
+                  <td><b style={{color: '#f43f5e', fontFamily: 'var(--font-mono)'}}>{money(a.loss, currency)}</b></td>
                 </tr>
               ))}
             </tbody>
@@ -329,7 +422,13 @@ export function Attribution({result,cid}:{result:Result;cid:string}){
   );
 }
 
-export function StressLab({detail}:{detail:Detail}){
+export function StressLab({
+  detail,
+  currency='INR'
+}:{
+  detail:Detail;
+  currency?:CurrencyMode;
+}){
   const c=detail.cluster,base=detail.result;
   const [scenario,setScenario]=useState('Moderate'),[intensity,setIntensity]=useState(1),[impact,setImpact]=useState(c.raw_impact),[exposure,setExposure]=useState(1),[rate,setRate]=useState(base?.inputs.rate_shock||0),[equity,setEquity]=useState(base?.inputs.equity_shock||0);
   const [result,setResult]=useState(base),[error,setError]=useState(''),[busy,setBusy]=useState(false),[custom,setCustom]=useState(false);
@@ -378,12 +477,12 @@ export function StressLab({detail}:{detail:Detail}){
               className={`scenario-choice ${!custom&&scenario===r.name?'chosen':''}`}
             >
               <span>{r.name} Scenario</span>
-              <b>{money(r.portfolio_after)}</b>
-              <small>Signed loss {money(r.absolute_loss)}</small>
+              <b>{money(r.portfolio_after, currency)}</b>
+              <small>Signed loss {money(r.absolute_loss, currency)}</small>
             </button>
           ))}
         </div>
-        <Plot data={detail.comparison.map(r=>({scenario:r.name,loss_M:r.absolute_loss/1e6}))} x="scenario" y="loss_M" bar color="#f59e0b"/>
+        <Plot data={detail.comparison.map(r=>({scenario:r.name,loss_M:r.absolute_loss/1e6}))} x="scenario" y="loss_M" bar color="#f59e0b" currency={currency}/>
       </Panel>
 
       <Panel title="Interactive What-If Scenario Lab" note="Drag any shock assumption to trigger real-time repricing through the asset-level stress engine.">
@@ -417,7 +516,7 @@ export function StressLab({detail}:{detail:Detail}){
 
       {result&&(
         <div style={{opacity: busy ? 0.6 : 1, transition: 'opacity 0.2s'}}>
-          <Attribution result={result} cid={c.id}/>
+          <Attribution result={result} cid={c.id} currency={currency}/>
         </div>
       )}
     </>

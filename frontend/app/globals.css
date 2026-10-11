@@ -418,6 +418,34 @@ header {
   text-transform: uppercase;
 }
 
+.workflow-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+}
+
+.step-pill {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.step-pill.active {
+  color: var(--accent-cyan);
+}
+
+.step-sep {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
 h1 {
   font-size: 28px;
   letter-spacing: -0.7px;

@@ -6,9 +6,7 @@ Real-Time Financial Risk Intelligence & Portfolio Stress Testing
 **College Email ID:** iit2024081@iiita.ac.in  
 **College / Campus:** Indian Institute of Information Technology, Allahabad (IIITA)  
 **Demo Video Link:** [https://youtu.be/LDvdLkTs5go](https://youtu.be/LDvdLkTs5go)  
-**Slide Deck Link:** https://drive.google.com/file/d/115Pme5AcQ2_Nk9ZKcmh-HvIg6tZk1htN/view?usp=sharing 
-
-The submission deck is [docs/presentation.pdf](docs/presentation.pdf) in this repository.  
+**Slide Deck Link (if hosted externally):** [Google Drive Slides](https://drive.google.com/file/d/115Pme5AcQ2_Nk9ZKcmh-HvIg6tZk1htN/view?usp=sharing) (Repository copy: [docs/presentation.pdf](docs/presentation.pdf))  
 
 ---
 
@@ -123,5 +121,5 @@ pytest backend/tests
 ### Deliverables & Reference Links
 * **Demo Video Walkthrough (10 mins):** [https://youtu.be/LDvdLkTs5go](https://youtu.be/LDvdLkTs5go)
 * **Architecture Diagram:** [docs/architecture.png](docs/architecture.png)
-* **Presentation Deck (7 slides):** [docs/presentation.pdf](docs/presentation.pdf)
+* **Presentation Deck (7 slides):** [docs/presentation.pdf](docs/presentation.pdf) (Also on [Google Drive](https://drive.google.com/file/d/115Pme5AcQ2_Nk9ZKcmh-HvIg6tZk1htN/view?usp=sharing))
 * **Dataset Documentation:** [data/README.md](data/README.md)

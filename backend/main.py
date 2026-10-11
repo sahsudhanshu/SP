@@ -126,7 +126,9 @@ def health():
     signals=store.all_rows('RiskSignal')
     live_count=sum(s['id'].startswith('live_') for s in signals)
     demo_count=sum(s['id'].startswith(('news_','social_posts_')) for s in signals)
-    return {'status':'ok','sentiment_mode':sentiment.mode,'model_error':sentiment.error,
+    mode = sentiment.mode if sentiment else 'fallback'
+    err = sentiment.error if sentiment else None
+    return {'status':'ok','sentiment_mode':mode,'model_error':err,
             'data_mode':live_status.get('mode') or ('live_news' if live_count else 'synthetic demo'),
             'live_provider':live_status.get('provider'), 'live_error':live_status.get('reason'),
             'live_observations':live_count,'demo_observations':demo_count,'offline_ready':True}

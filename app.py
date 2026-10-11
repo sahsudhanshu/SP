@@ -11,6 +11,22 @@ if not os.path.exists("backend/database/riskpulse.db"):
     except Exception as e:
         print(f"Warning: seeding database failed: {e}")
 
+try:
+    import spaces
+    GPU = spaces.GPU
+except (ImportError, AttributeError):
+    def GPU(func):
+        return func
+
+@GPU
+def predict_sentiment_gpu(text: str = "TCS reports 12% net profit growth driven by banking technology expansion."):
+    """ZeroGPU accelerated sentiment analysis endpoint"""
+    try:
+        from backend.services.nlp import sentiment_engine
+        return sentiment_engine.infer(text)
+    except Exception as e:
+        return {"sentiment_label": "neutral", "sentiment_score": 0.0, "error": str(e)}
+
 def status_check():
     return (
         "🟢 Status: Operational\n"
@@ -32,6 +48,15 @@ with gr.Blocks(title="RiskPulse AI — Backend Services") as demo:
     status_btn = gr.Button("Ping Service Health", variant="primary")
     status_output = gr.Textbox(label="System Status", value=status_check())
     status_btn.click(fn=status_check, outputs=status_output)
+
+    with gr.Accordion("⚡ FinBERT Sentiment Inference (GPU Accelerated)", open=True):
+        text_input = gr.Textbox(
+            label="Financial Headline / Text",
+            value="HDFC Bank reports quarterly credit growth beating consensus estimates."
+        )
+        infer_btn = gr.Button("Analyze Financial Sentiment", variant="secondary")
+        infer_output = gr.JSON(label="FinBERT Output")
+        infer_btn.click(fn=predict_sentiment_gpu, inputs=text_input, outputs=infer_output)
 
 # Mount the Gradio interface onto FastAPI
 app = gr.mount_gradio_app(fastapi_app, demo, path="/")

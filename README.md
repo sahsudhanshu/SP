@@ -5,8 +5,8 @@ Real-Time Financial Risk Intelligence & Portfolio Stress Testing
 **Candidate Name:** Sudhanshu  
 **College Email ID:** iit2024081@iiita.ac.in  
 **College / Campus:** Indian Institute of Information Technology, Allahabad (IIITA)  
-**Demo Video Link:** _Pending — 10-minute YouTube Unlisted recording (to be uploaded before deadline)_  
-**Slide Deck Link (if hosted externally):** [docs/presentation.pdf](docs/presentation.pdf) (Also available as [editable PPTX](docs/presentation.pptx))  
+**Demo Video Link:** _Pending — record the walkthrough, upload it to YouTube as Unlisted, confirm it plays in a private window, then paste the URL here before the deadline._  
+**Slide Deck Link (if hosted externally):** Not hosted externally. The submission deck is [docs/presentation.pdf](docs/presentation.pdf) in this repository.  
 
 ---
 
@@ -109,18 +109,17 @@ pytest backend/tests
 ## 5. Key Results & Domain Impact
 
 ### Key Results & Metrics
-* **Deterministic Baseline Loss:** On the flagship geopolitical crisis scenario (Helios Energy shipping blockade), the model calculates an impact score of **9.78 / 10**, identifying **INR 42.0M direct exposure** and **INR 59.5M weighted exposure**. Under baseline intensity, portfolio value decreases from **INR 100.00M to INR 97.18M** (net loss: INR 2.82M / 2.82%).
-* **NLP Classification Accuracy:** Evaluated across the benchmark dataset with **100% event classification agreement** and **91.67% sentiment agreement**.
-* **Inference Speed:** Average end-to-end NLP and risk pipeline latency of **~22 ms per record** on CPU.
-* **Traceability:** Every calculated loss dollar links back to specific text evidence, confidence scores, and formula weights.
+* **Deterministic baseline:** On the synthetic Helios Energy geopolitical case, raw impact is **9.78 / 10**, direct exposure is **INR 42.0M**, and weighted exposure is **INR 59.5M**. At moderate intensity the book moves from **INR 100.00M to INR 97.183M** (conditional loss **INR 2.817M**). At 1.5× intensity the conditional loss is **INR 4.226M**.
+* **Local diagnostic, not a market test:** On 24 author-labelled synthetic records, event-label agreement is **100%** and sentiment-label agreement is **91.67%**. These records are small and correlated. They do not measure real-market accuracy.
+* **Traceability:** Each conditional loss ties back to the source text, the path weights, and the scenario assumption. Confidence ranks the event. It is not used as a loss probability.
 
 ### Domain Impact
-* **Rapid Risk Triage:** Replaces manual parsing of market news with automatic risk scoring and entity mapping within milliseconds.
-* **Proactive Stress Testing:** Automatically triggers portfolio stress testing when high-severity events (impact ≥ 8) are detected, alerting risk officers before market close.
-* **Interactive What-If Exploration:** Enables credit analysts to test custom shock intensities, compare historical vs hypothetical scenarios, and toggle reporting currencies (₹ INR Cr vs $ USD M).
+* **Event priority, not headline volume:** A copied social post is collapsed and does not raise confidence.
+* **Exposure before the scenario:** An analyst can see the INR 42M direct and INR 59.5M weighted exposure before comparing shocks.
+* **A loss that can be challenged:** Energy and the largest position reconcile to the portfolio total. Impact of 8 or above saves an automatic stress test. The what-if controls change assumptions, not the book. Display can switch between rupees and a USD scale.
 
 ### Deliverables & Reference Links
 * **Architecture Diagram:** [docs/architecture.png](docs/architecture.png)
-* **Presentation Deck (7 Slides):** [docs/presentation.pdf](docs/presentation.pdf) (Editable: [docs/presentation.pptx](docs/presentation.pptx))
+* **Presentation Deck (7 slides):** [docs/presentation.pdf](docs/presentation.pdf)
 * **Dataset Documentation:** [data/README.md](data/README.md)
 * **Submission Audit Checklist:** [docs/submission-audit.md](docs/submission-audit.md)

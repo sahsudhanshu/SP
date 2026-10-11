@@ -357,19 +357,6 @@ nav a.active svg, nav button.active svg {
   box-shadow: 0 0 8px var(--accent-coral);
 }
 
-.legacy-link {
-  display: block;
-  margin-top: 5px;
-  font-size: 10px;
-  color: var(--text-muted);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.legacy-link:hover {
-  color: var(--accent-cyan);
-}
-
 /* Main Area */
 main {
   margin-left: 252px;

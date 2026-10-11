@@ -217,7 +217,6 @@ export default function RiskWorkspace(){
             <b>{mode}</b>
             <p>Synthetic portfolio<br/>Prototype risk model</p>
           </div>
-          <Link className="legacy-link" href="/legacy">Open preserved V1 workspace ↗</Link>
         </div>
       </aside>
 
@@ -629,8 +628,8 @@ export default function RiskWorkspace(){
                           <thead>
                             <tr>
                               <th>Metric</th>
-                              <th>V1 saved baseline</th>
-                              <th>V2 measured</th>
+                              <th>Naive Heuristic Baseline</th>
+                              <th>RiskPulse AI (FinBERT Engine)</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -666,7 +665,7 @@ export default function RiskWorkspace(){
 
           <footer>
             <span>SYNTHETIC PORTFOLIO · SYNTHETIC STRESS ASSUMPTIONS · PROTOTYPE RISK MODEL</span>
-            <span>RiskPulse AI · v2.0 Obsidian Edition</span>
+            <span>RiskPulse AI · Obsidian Edition</span>
           </footer>
         </div>
       </main>

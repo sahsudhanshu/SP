@@ -64,8 +64,8 @@ See [data documentation](data/README.md) for complete schema descriptions.
 
 ### Step 1: Clone Repository
 ```bash
-git clone https://github.com/sahsudhanshu/SP.git
-cd SP
+git clone https://github.com/sahsudhanshu/iiitallahabad-sudhanshu-hackathon.git
+cd iiitallahabad-sudhanshu-hackathon
 ```
 
 ### Step 2: Backend Setup & Run

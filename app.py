@@ -13,12 +13,13 @@ if not os.path.exists("backend/database/riskpulse.db"):
 
 try:
     import spaces
-    GPU = spaces.GPU
 except (ImportError, AttributeError):
-    def GPU(func):
-        return func
+    class spaces:
+        @staticmethod
+        def GPU(func):
+            return func
 
-@GPU
+@spaces.GPU
 def predict_sentiment_gpu(text: str = "TCS reports 12% net profit growth driven by banking technology expansion."):
     """ZeroGPU accelerated sentiment analysis endpoint"""
     try:

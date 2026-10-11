@@ -19,8 +19,8 @@ for current,dirs,names in os.walk(ROOT):
         files.append(file)
 with zipfile.ZipFile(destination/'riskpulse-ai-source.zip','w',zipfile.ZIP_DEFLATED) as archive:
     for file in sorted(files): archive.write(file,Path('riskpulse-ai')/file.relative_to(ROOT))
-for name in ['presentation.pdf','presentation.pptx','architecture.png','submission-audit.md','metrics-v1.json','metrics-v2.json','v2-final-report.md','technical-differentiators.md','jury-qa.md','live-pitch-script.md','demo-script.md']:
-    shutil.copy2(ROOT/'docs'/name,destination/name)
+for name in ['presentation.pdf','presentation.pptx','architecture.png','submission-audit.md','metrics-v1.json','metrics-v2.json']:
+    if (ROOT/'docs'/name).exists(): shutil.copy2(ROOT/'docs'/name,destination/name)
 shutil.copy2(ROOT/'README.md',destination/'README.md')
 shutil.copy2(ROOT/'screenshots/v2-overview.png',destination/'dashboard.png')
 with zipfile.ZipFile(destination/'riskpulse-ai-source.zip') as archive:

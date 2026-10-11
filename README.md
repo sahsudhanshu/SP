@@ -2,10 +2,10 @@
 
 Real-Time Financial Risk Intelligence & Portfolio Stress Testing
 
-**Candidate Name:** Pending full candidate name  
-**College Email ID:** Pending college email  
-**College / Campus:** Pending college name  
-**Demo Video Link:** Pending 10-minute YouTube Unlisted recording  
+**Candidate Name:** Sudhanshu  
+**College Email ID:** iit2024081@iiita.ac.in  
+**College / Campus:** Indian Institute of Information Technology, Allahabad (IIITA)  
+**Demo Video Link:** _Pending — 10-minute YouTube Unlisted recording (to be uploaded before deadline)_  
 **Repository:** https://github.com/sahsudhanshu/SP  
 **Slide Deck:** [Seven-slide PDF](docs/presentation.pdf) and [editable PPTX](docs/presentation.pptx)
 

@@ -81,18 +81,6 @@ def _analyze(req, item_id=None, timestamp=None, source_url=None):
     return signal
 
 def demo_items():
-    return [item for pair in zip(store.all_rows('NewsItem'),store.all_rows('SocialPost')) for item in pair]
-    if signal['stress_recommended']:
-        scenario=next((s for s in store.all_rows('StressScenario') if s['event_type']==signal['event_type']),None)
-        if scenario:
-            result=stress(signal,scenario,assets)
-            result['id']='auto_'+signal['id']; result['automatic']=True
-            store.save('StressTestResult',result['id'],result)
-            signal['automatic_stress_id']=result['id']
-            store.save('RiskSignal',signal['id'],signal)
-    return signal
-
-def demo_items():
     news=store.all_rows('NewsItem'); social=store.all_rows('SocialPost')
     return [item for pair in zip(news,social) for item in pair]
 

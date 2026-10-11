@@ -1,4 +1,4 @@
-"""V2 adapters reuse the V1 asset valuation formula without changing its contract."""
+"""Scenario analysis and portfolio asset repricing engine."""
 from copy import deepcopy
 from backend.services.finance import exposure, stress
 

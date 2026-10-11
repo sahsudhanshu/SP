@@ -15,3 +15,4 @@ work/
 .models/
 *.log
 docs/demo-script.md
+pytest.ini

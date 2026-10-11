@@ -1,4 +1,4 @@
-"""Additive API: V1 observation contracts remain unchanged."""
+"""Clustered risk intelligence, graph propagation, and dynamic what-if simulation APIs."""
 import json
 import threading
 from datetime import datetime, timezone
@@ -11,7 +11,7 @@ from backend.services.scenario_analysis import calculate, compare
 from backend.services.finance import exposure
 from backend.services.live_news import status as live_status
 
-router = APIRouter(prefix='/api/v2', tags=['V2 intelligence'])
+router = APIRouter(prefix='/api/v2', tags=['Risk Intelligence'])
 lock = threading.RLock()
 
 def state():
@@ -50,7 +50,7 @@ def record_observation(signal):
         transitions = ['signal appears' if previous is None else 'related observation received']
         if previous and c['effective_risk'] > previous['event_risk'] + .001: transitions.append('signal strengthens')
         if c['effective_risk'] >= 6 and (previous is None or previous['event_risk'] < 6): transitions.append('high-risk threshold crossed')
-        if signal.get('automatic_stress_id'): transitions.append('V1 raw-impact stress triggered')
+        if signal.get('automatic_stress_id'): transitions.append('Automated stress test triggered')
         row = {'id': 'history_' + signal['id'], 'signal_id': signal['id'], 'cluster_id': c['id'],
                'sequence': len(history)+1, 'timestamp': as_of, 'recorded_at': datetime.now(timezone.utc).isoformat(),
                'clock': clock, 'headline': signal['headline'], 'event_type': c['event_type'],

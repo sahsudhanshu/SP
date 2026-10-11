@@ -1,3 +1,15 @@
+---
+title: Riskpulse Api
+emoji: ⚡
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: 6.30.0
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # RiskPulse AI - S&P Global & Crisil Campus Hackathon
 
 Real-Time Financial Risk Intelligence & Portfolio Stress Testing
